@@ -77,7 +77,7 @@ namespace ILRuntime.Runtime.Intepreter.RegisterVM
                 }
             }
 #endif
-
+            Optimizer.ForLoop(blocks);
             Optimizer.ForwardCopyPropagation(blocks, hasReturn, baseRegStart);
             Optimizer.BackwardsCopyPropagation(blocks, hasReturn, baseRegStart);
             Optimizer.ForwardCopyPropagation(blocks, hasReturn, baseRegStart);
