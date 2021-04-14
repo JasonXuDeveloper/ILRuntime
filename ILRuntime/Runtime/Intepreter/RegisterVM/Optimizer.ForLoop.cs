@@ -21,6 +21,7 @@ namespace ILRuntime.Runtime.Intepreter.RegisterVM
             int i = 1;
             foreach (var b in blocks)
             {
+                Console.WriteLine();
                 Console.WriteLine($"================");
                 Console.WriteLine($"开始分析第{i}个Block");
                 Console.WriteLine($"这个block有{b.NextBlocks.Count}个next");
@@ -31,15 +32,13 @@ namespace ILRuntime.Runtime.Intepreter.RegisterVM
                         Console.WriteLine($"Next = blocks[{blocks.IndexOf(_b)}]");
                     }
                 }
-                //i++;
-                //continue;
+
                 var result = LoopStartBlock(b,blocks);
 
                 if (result != null)
                 {
-                    Console.WriteLine("==========是for循环==========");
+                    Console.WriteLine("是for循环");
                     Console.WriteLine($"For 循环从Block{blocks.IndexOf(result)+1}开始一直到Block{blocks.IndexOf(b)+1}结束");
-                    Console.WriteLine("==========打印完final instruction了==========");
                 }
                 else
                 {
@@ -55,7 +54,7 @@ namespace ILRuntime.Runtime.Intepreter.RegisterVM
         }
 
 
-        private static CodeBasicBlock LoopStartBlock(CodeBasicBlock block,List<CodeBasicBlock> blocks)
+        private static CodeBasicBlock LoopStartBlock(CodeBasicBlock block,List<CodeBasicBlock> allBlocks)
         {
             //程序集路径：C:\Users\Jason\Documents\GitHub\ILRuntime\TestCases\bin\Debug\TestCases.dll
 
@@ -78,7 +77,7 @@ namespace ILRuntime.Runtime.Intepreter.RegisterVM
              */
             foreach(var b in next)
             {
-               if(blocks.Contains(b) && blocks.IndexOf(b) < blocks.IndexOf(block))
+               if(allBlocks.Contains(b) && allBlocks.IndexOf(b) < allBlocks.IndexOf(block))
                 {
                     return b;
                 }
