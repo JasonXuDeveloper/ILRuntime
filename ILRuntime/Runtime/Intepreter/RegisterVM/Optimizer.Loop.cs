@@ -16,7 +16,6 @@ namespace ILRuntime.Runtime.Intepreter.RegisterVM
     {
         public static void ForLoop(List<CodeBasicBlock> blocks)
         {
-            //程序集路径：C:\Users\Jason\Documents\GitHub\ILRuntime\TestCases\bin\Debug\TestCases.dll
             Console.WriteLine("开始优化For循环");
             int i = 1;
             foreach (var b in blocks)
@@ -24,21 +23,11 @@ namespace ILRuntime.Runtime.Intepreter.RegisterVM
                 Console.WriteLine();
                 Console.WriteLine($"================");
                 Console.WriteLine($"开始分析第{i}个Block");
-                Console.WriteLine($"这个block有{b.NextBlocks.Count}个next");
-                if (b.NextBlocks.Count > 1)
-                {
-                    foreach(var _b in b.NextBlocks)
-                    {
-                        Console.WriteLine($"Next = blocks[{blocks.IndexOf(_b)}]");
-                    }
-                }
 
                 var result = LoopStartBlock(b,blocks);
-
                 if (result != null)
                 {
-                    Console.WriteLine("是for循环");
-                    Console.WriteLine($"For 循环从Block{blocks.IndexOf(result)+1}开始一直到Block{blocks.IndexOf(b)+1}结束");
+                    Console.WriteLine($"循环从Block{blocks.IndexOf(result)+1}开始一直到Block{blocks.IndexOf(b)+1}结束");
                 }
                 else
                 {
@@ -53,11 +42,8 @@ namespace ILRuntime.Runtime.Intepreter.RegisterVM
             Console.WriteLine("优化For循环结束");
         }
 
-
         private static CodeBasicBlock LoopStartBlock(CodeBasicBlock block,List<CodeBasicBlock> allBlocks)
         {
-            //程序集路径：C:\Users\Jason\Documents\GitHub\ILRuntime\TestCases\bin\Debug\TestCases.dll
-
             HashSet<CodeBasicBlock> next = block.NextBlocks;
 
             if (next.Count == 1)//如果有1个next，那他肯定不是直接for的block，for的block有2个next，

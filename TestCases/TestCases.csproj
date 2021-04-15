@@ -44,7 +44,7 @@
     <Compile Include="ActivatorCreateInstanceTest.cs" />
     <Compile Include="AsyncAwaitTest.cs" />
     <Compile Include="DelegateInnerTest.cs" />
-    <Compile Include="ForTest.cs" />
+    <Compile Include="LoopTest.cs" />
     <Compile Include="GenericMethodTest.cs" />
     <Compile Include="JsonTest.cs" />
     <Compile Include="StaticTest.cs" />
