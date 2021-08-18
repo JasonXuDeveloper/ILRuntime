@@ -35,6 +35,8 @@ namespace ILRuntimeTest.TestFramework
 
         public static TestVector3 One = new TestVector3(1, 1, 1);
 
+        public static Func<TestVector3, float> TestDelegate;
+
         public TestVector3(float x, float y, float z)
         {
             X = x;
@@ -88,6 +90,17 @@ namespace ILRuntimeTest.TestFramework
     {
         public TestVector3 vector = new TestVector3(20f, 10f, 1f);
         public TestVector3 Vector2 { get; set; } = TestVector3.One * 0.33f;
+        public TestVectorClass Obj { get; set; }
+
+        public static void ValueTypePerfTest(int a, string b, TestVector3 c, TestVectorClass d)
+        {
+
+        }
+
+        public static void ValueTypePerfTest2(int a, string b, TestVectorClass c, TestVectorClass d)
+        {
+
+        }
     }
 
     public struct TestVectorStruct

@@ -22,9 +22,12 @@ namespace ILRuntime.Runtime.Generated
             MethodBase method;
             Type[] args;
             Type type = typeof(ILRuntimeTest.TestFramework.TestClass4);
+            args = new Type[]{};
+            method = type.GetMethod("KKK", flag, null, args, null);
+            app.RegisterCLRMethodRedirection(method, KKK_0);
             args = new Type[]{typeof(ILRuntimeTest.TestFramework.TestStruct[]).MakeByRefType()};
             method = type.GetMethod("TestArrayOut", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, TestArrayOut_0);
+            app.RegisterCLRMethodRedirection(method, TestArrayOut_1);
 
             args = new Type[]{};
             method = type.GetConstructor(flag, null, args, null);
@@ -33,17 +36,32 @@ namespace ILRuntime.Runtime.Generated
         }
 
 
-        static StackObject* TestArrayOut_0(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        static StackObject* KKK_0(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* ptr_of_this_method;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 1);
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
+            ILRuntimeTest.TestFramework.TestClass4 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass4)typeof(ILRuntimeTest.TestFramework.TestClass4).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            __intp.Free(ptr_of_this_method);
+
+            instance_of_this_method.KKK();
+
+            return __ret;
+        }
+
+        static StackObject* TestArrayOut_1(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             StackObject* ptr_of_this_method;
             StackObject* __ret = ILIntepreter.Minus(__esp, 2);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            ILRuntimeTest.TestFramework.TestStruct[] @arr = (ILRuntimeTest.TestFramework.TestStruct[])typeof(ILRuntimeTest.TestFramework.TestStruct[]).CheckCLRTypes(__intp.RetriveObject(ptr_of_this_method, __mStack));
+            ILRuntimeTest.TestFramework.TestStruct[] @arr = (ILRuntimeTest.TestFramework.TestStruct[])typeof(ILRuntimeTest.TestFramework.TestStruct[]).CheckCLRTypes(__intp.RetriveObject(ptr_of_this_method, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            ILRuntimeTest.TestFramework.TestClass4 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass4)typeof(ILRuntimeTest.TestFramework.TestClass4).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack));
+            ILRuntimeTest.TestFramework.TestClass4 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass4)typeof(ILRuntimeTest.TestFramework.TestClass4).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
 
             instance_of_this_method.TestArrayOut(out @arr);
 

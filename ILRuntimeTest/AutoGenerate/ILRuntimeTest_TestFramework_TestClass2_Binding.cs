@@ -31,9 +31,18 @@ namespace ILRuntime.Runtime.Generated
             args = new Type[]{typeof(System.Int32)};
             method = type.GetMethod("AbMethod2", flag, null, args, null);
             app.RegisterCLRMethodRedirection(method, AbMethod2_2);
+            args = new Type[]{typeof(ILRuntimeTest.TestFramework.TestClass2)};
+            method = type.GetMethod("Register", flag, null, args, null);
+            app.RegisterCLRMethodRedirection(method, Register_3);
+            args = new Type[]{};
+            method = type.GetMethod("Alloc", flag, null, args, null);
+            app.RegisterCLRMethodRedirection(method, Alloc_4);
             args = new Type[]{};
             method = type.GetMethod("VMethod2", flag, null, args, null);
-            app.RegisterCLRMethodRedirection(method, VMethod2_3);
+            app.RegisterCLRMethodRedirection(method, VMethod2_5);
+            args = new Type[]{typeof(System.Int32), typeof(System.Int32)};
+            method = type.GetMethod("Add", flag, null, args, null);
+            app.RegisterCLRMethodRedirection(method, Add_6);
 
 
         }
@@ -46,7 +55,7 @@ namespace ILRuntime.Runtime.Generated
             StackObject* __ret = ILIntepreter.Minus(__esp, 1);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            ILRuntimeTest.TestFramework.TestClass2 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass2)typeof(ILRuntimeTest.TestFramework.TestClass2).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack));
+            ILRuntimeTest.TestFramework.TestClass2 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass2)typeof(ILRuntimeTest.TestFramework.TestClass2).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
             __intp.Free(ptr_of_this_method);
 
             instance_of_this_method.VMethod1();
@@ -64,7 +73,7 @@ namespace ILRuntime.Runtime.Generated
             System.Int32 @arg = __intp.RetriveInt32(ptr_of_this_method, __mStack);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            ILRuntimeTest.TestFramework.TestClass2 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass2)typeof(ILRuntimeTest.TestFramework.TestClass2).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack));
+            ILRuntimeTest.TestFramework.TestClass2 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass2)typeof(ILRuntimeTest.TestFramework.TestClass2).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
 
             instance_of_this_method.VMethod3(ref @arg);
 
@@ -129,7 +138,7 @@ namespace ILRuntime.Runtime.Generated
             System.Int32 @arg1 = ptr_of_this_method->Value;
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
-            ILRuntimeTest.TestFramework.TestClass2 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass2)typeof(ILRuntimeTest.TestFramework.TestClass2).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack));
+            ILRuntimeTest.TestFramework.TestClass2 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass2)typeof(ILRuntimeTest.TestFramework.TestClass2).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
             __intp.Free(ptr_of_this_method);
 
             var result_of_this_method = instance_of_this_method.AbMethod2(@arg1);
@@ -139,20 +148,72 @@ namespace ILRuntime.Runtime.Generated
             return __ret + 1;
         }
 
-        static StackObject* VMethod2_3(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        static StackObject* Register_3(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
             StackObject* ptr_of_this_method;
             StackObject* __ret = ILIntepreter.Minus(__esp, 1);
 
             ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
-            ILRuntimeTest.TestFramework.TestClass2 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass2)typeof(ILRuntimeTest.TestFramework.TestClass2).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack));
+            ILRuntimeTest.TestFramework.TestClass2 @obj = (ILRuntimeTest.TestFramework.TestClass2)typeof(ILRuntimeTest.TestFramework.TestClass2).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
+            __intp.Free(ptr_of_this_method);
+
+
+            ILRuntimeTest.TestFramework.TestClass2.Register(@obj);
+
+            return __ret;
+        }
+
+        static StackObject* Alloc_4(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 0);
+
+
+            var result_of_this_method = ILRuntimeTest.TestFramework.TestClass2.Alloc();
+
+            object obj_result_of_this_method = result_of_this_method;
+            if(obj_result_of_this_method is CrossBindingAdaptorType)
+            {    
+                return ILIntepreter.PushObject(__ret, __mStack, ((CrossBindingAdaptorType)obj_result_of_this_method).ILInstance);
+            }
+            return ILIntepreter.PushObject(__ret, __mStack, result_of_this_method);
+        }
+
+        static StackObject* VMethod2_5(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* ptr_of_this_method;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 1);
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
+            ILRuntimeTest.TestFramework.TestClass2 instance_of_this_method = (ILRuntimeTest.TestFramework.TestClass2)typeof(ILRuntimeTest.TestFramework.TestClass2).CheckCLRTypes(StackObject.ToObject(ptr_of_this_method, __domain, __mStack), (CLR.Utils.Extensions.TypeFlags)0);
             __intp.Free(ptr_of_this_method);
 
             var result_of_this_method = instance_of_this_method.VMethod2();
 
             __ret->ObjectType = ObjectTypes.Integer;
             __ret->Value = result_of_this_method ? 1 : 0;
+            return __ret + 1;
+        }
+
+        static StackObject* Add_6(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)
+        {
+            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;
+            StackObject* ptr_of_this_method;
+            StackObject* __ret = ILIntepreter.Minus(__esp, 2);
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 1);
+            System.Int32 @b = ptr_of_this_method->Value;
+
+            ptr_of_this_method = ILIntepreter.Minus(__esp, 2);
+            System.Int32 @a = ptr_of_this_method->Value;
+
+
+            var result_of_this_method = ILRuntimeTest.TestFramework.TestClass2.Add(@a, @b);
+
+            __ret->ObjectType = ObjectTypes.Integer;
+            __ret->Value = result_of_this_method;
             return __ret + 1;
         }
 

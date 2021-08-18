@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ILRuntimeTest.TestFramework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -289,5 +290,123 @@ namespace TestCases
                 throw new Exception();
         }
 
+        class ClassA
+        {
+            public string str;
+            public ClassA(string s)
+            {
+                str = s;
+            }
+            public static implicit operator string(ClassA a) => a.str;
+
+        }
+
+        struct StructA
+        {
+            public ClassA A;
+        }
+        public static void StructTest9()
+        {
+            StructTest9Sub(new ClassA("aaa"));
+        }
+
+        static void StructTest9Sub(ClassA a)
+        {
+            StructTest9Sub2(a);
+            string str2 = a;
+            if (str2 != "aaa")
+                throw new Exception();
+        }
+
+        static StructA StructTest9Sub2(ClassA a)
+        {
+            StructA s = new StructA()
+            {
+                A = a,
+            };
+            return s;
+        }
+
+        public static void StructTest10()
+        {
+            ILRuntimeTest.TestFramework.TestVector3 vec = StructTest10Sub();
+            if (vec.X != 1)
+                throw new Exception();
+        }
+
+        static ILRuntimeTest.TestFramework.TestVector3 StructTest10Sub()
+        {
+            ILRuntimeTest.TestFramework.TestVector3 res = ILRuntimeTest.TestFramework.TestVector3.One2;
+            switch(res.X)
+            {
+                case 2:
+                    Console.WriteLine("113");
+                    break;
+                case 6:
+                    Console.WriteLine("1136");
+                    break;
+                case 100:
+                    Console.WriteLine("11399");
+                    break;
+                case 133:
+                    Console.WriteLine("1131");
+                    break;
+            }
+            object[] arr = new object[] { res };
+            Console.WriteLine("vec=" + arr[0]);
+            return res;
+        }
+
+        public static void StructTest11()
+        {
+            List<Anim> lst = new List<Anim>();
+            for(int i = 0; i < 50; i++)
+            {
+                lst.Add(new Anim(i.ToString(), i + 10f));
+            }
+        }
+
+        struct Anim
+        {
+            public string name;
+            public float duration;
+
+            public Anim(string name, float duration)
+            {
+                this.name = name;
+                this.duration = duration;
+            }
+        }
+
+        public interface ITestStruct
+        {
+            int i { get; set; }
+        }
+        public struct MyStruct2 : ITestStruct
+        {
+            public int i { get; set; }
+        }
+        static void StructTest12Sub<T>() where T : struct, ITestStruct
+        {
+            T ins = new T() { i = 10 };
+            Console.WriteLine(ins.i);
+            if (ins.i != 10) //输出结果为0
+                throw new Exception();
+        }
+        public static void StructTest12()
+        {
+            StructTest12Sub<MyStruct2>();
+        }
+
+        public static void StructTest13()
+        {
+            StructTest13Sub<TestVector3>();
+        }
+
+        static void StructTest13Sub<T>() where T : struct
+        {
+            T ins = new T();
+            Console.WriteLine(ins);
+        }
     }
 }

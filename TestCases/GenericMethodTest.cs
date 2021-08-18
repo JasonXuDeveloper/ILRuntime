@@ -271,7 +271,6 @@ namespace TestCases
             var obj = Fetch<TestInterface>();
             Console.WriteLine(obj.ToString());
         }
-
         interface IBinderCollection<T>
         {
             
@@ -328,6 +327,7 @@ namespace TestCases
             GenericMethodTest12Sub(new int[] { 3 }, k => {
                 k = k + 2;//error;
                 k = k << 2;//error;
+                Console.WriteLine($"k={k}");
             });
         }
 
@@ -406,6 +406,44 @@ namespace TestCases
         {
             var testa = new TestA<int>();
             testa.TestStatic();  //输出了‘arr’ 然后报错  调用了泛型数组的方法，正常应该调用泛型接口的方法
+        }
+        public static void GenericMethodTest17()
+        {
+            Foo3<object>(typeof(GenericMethodTest));
+        }
+
+        public static void GenericMethodTest18()
+        {
+            float[] val = TestStaticGenericClassField<float[]>.GetValue("key");
+            Console.WriteLine($"=======TestStaticGenericClassField<float[]>.GetValue: {val}");
+
+            var val2 = TestStaticGenericClassField<float>.GetValue("key");
+            Console.WriteLine($"=======TestStaticGenericClassField<float>.GetValue: {val2}");
+
+        }
+        static class TestStaticGenericClassField<T>
+        {
+            public static readonly Dictionary<string, T> Dict = new Dictionary<string, T>();
+
+
+            public static T GetValue(string key, T def = default(T))
+            {
+                if (Dict.TryGetValue(key, out var res))
+                {
+                    return res;
+                }
+                return def;
+            }
+        }
+        static void Foo3<T>(out T value) where T : class
+        {
+            value = null;
+            throw new Exception();
+        }
+
+        static void Foo3<T>(Type type) where T : class
+        {
+
         }
         public static void GenericExtensionMethod1Test1()
         {
@@ -611,6 +649,30 @@ namespace TestCases
         static T GenericStaticMethodTest14Sub<T>()
         {
             return default(T);
+        }
+
+        public static void GenericStaticMethodTest15()
+        {
+            var e2 = GenericStaticMethodTest14Sub<TestVector3>();
+            Console.WriteLine(e2);
+        }
+
+        public static void GenericStaticMethodTest16()
+        {
+            var e2 = GenericStaticMethodTest14Sub<TestVector3NoBinding>();
+            Console.WriteLine(e2);
+        }
+
+        public static void GenericStaticMethodTest17()
+        {
+            var e2 = GenericStaticMethodTest14Sub<int>();
+            Console.WriteLine(e2);
+        }
+
+        public static void GenericStaticMethodTest18()
+        {
+            var e2 = GenericStaticMethodTest14Sub<Vector3>();
+            Console.WriteLine(e2);
         }
     }
 

@@ -130,6 +130,7 @@ namespace TestCases
         public static void InheritanceTest07()
         {
             TestClass2 cls = new TestCls5();
+            Console.WriteLine(cls);
             cls.VMethod1();
             int val = 0;
             cls.VMethod3(ref val);
@@ -243,6 +244,101 @@ namespace TestCases
                 throw new Exception();
         }
 
+        public static void InheritanceTest16()
+        {
+            InheritanceTest16SubCls2 cls = new InheritanceTest16SubCls2();
+            cls.KKK();
+        }
+        public static void InheritanceTest17()
+        {
+            ClassB b = new ClassB();
+            CrossClass crossClass = new CrossClass();
+            if (!b.OutMethod(out crossClass.classA)) return;
+        }
+
+        public static void InheritanceTest18()
+        {
+            TestCls5 obj = new TestCls5();
+            TestClass2.Register(obj);
+
+            TestCls5 res;
+            Alloc<TestCls5>(out res);
+            res.bbbb = 5000;
+            if (res.bbbb != 5000)
+                throw new Exception();
+        }
+
+        static void Alloc<T>(out T value)where T : TestClass2
+        {
+            value = TestClass2.Alloc() as T;
+        }
+
+        class CrossClass : TestClass3
+        {
+            public ClassA classA;
+        }
+
+        class ClassA
+        {
+
+        }
+        class ClassC
+        {
+            public void Init()
+            {
+                ClassB b = new ClassB();
+                CrossClass crossClass = new CrossClass();
+                if (!b.OutMethod(out crossClass.classA)) return;
+            }
+        }
+        class ClassB
+        {
+            public bool OutMethod(out ClassA a)
+            {
+                a = new ClassA();
+                if (a == null)
+                {
+                    throw new Exception("classA is null");
+                }
+                return true;
+            }
+        }
+
+        class InheritanceTest16SubCls : TestClass2
+        {
+            public int constVal = 11111;
+            protected override void AbMethod1()
+            {
+                
+            }
+
+            public override float AbMethod2(int arg1)
+            {
+                return arg1 * 12333f;
+            }
+
+            public int Test(int arg)
+            {
+                return arg + constVal;
+            }
+        }
+
+        class InheritanceTest16SubCls2 : TestClass4
+        {
+            public override void KKK()
+            {
+                cls2 = new InheritanceTest16SubCls();
+
+                float res = cls2.AbMethod2(1);
+                if (Math.Abs(12333 - res) > 0.00001f)
+                    throw new Exception();
+
+                int res2 = ((InheritanceTest16SubCls)cls2).Test(5);
+                if (res2 != 11116)
+                    throw new Exception();
+            }
+        }
+
         public interface IData { }
 
         public class Data : IData { }
@@ -264,6 +360,7 @@ namespace TestCases
 
         class TestCls5 : TestClass2
         {
+            public int bbbb;
             public override void VMethod3(ref int arg)
             {
                 base.VMethod3(ref arg);
@@ -281,6 +378,11 @@ namespace TestCases
             protected override void AbMethod1()
             {
                 
+            }
+
+            public override string ToString()
+            {
+                return base.ToString();
             }
         }
 
@@ -684,6 +786,7 @@ namespace TestCases
         {
             var obj = new AA();
             ClassInheritanceTest.staticField = obj;
+            ClassInheritanceTest.staticField.Dispose();
         }
     }
 

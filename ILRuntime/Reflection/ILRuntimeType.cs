@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -14,7 +14,7 @@ namespace ILRuntime.Reflection
     {
         ILType type;
         Runtime.Enviorment.AppDomain appdomain;
-        object[] customAttributes;
+        Attribute[] customAttributes;
         Type[] attributeTypes;
         ILRuntimeFieldInfo[] fields;
         ILRuntimePropertyInfo[] properties;
@@ -32,11 +32,11 @@ namespace ILRuntime.Reflection
         {
             if(type.TypeDefinition == null)
             {
-                customAttributes = new object[0];
+                customAttributes = new Attribute[0];
                 attributeTypes = new Type[0];
                 return;
             }
-            customAttributes = new object[type.TypeDefinition.CustomAttributes.Count];
+            customAttributes = new Attribute[type.TypeDefinition.CustomAttributes.Count];
             attributeTypes = new Type[customAttributes.Length];
             for (int i = 0; i < type.TypeDefinition.CustomAttributes.Count; i++)
             {
@@ -44,7 +44,7 @@ namespace ILRuntime.Reflection
                 var at = appdomain.GetType(attribute.AttributeType, type, null);
                 try
                 {
-                    object ins = attribute.CreateInstance(at, appdomain);
+                    Attribute ins = attribute.CreateInstance(at, appdomain) as Attribute;
 
                     attributeTypes[i] = at.ReflectionType is ILRuntimeWrapperType ? at.TypeForCLR : at.ReflectionType;
                     customAttributes[i] = ins;
@@ -95,7 +95,7 @@ namespace ILRuntime.Reflection
                 KeyValuePair<string, IType>[] ga = new KeyValuePair<string, IType>[typeArguments.Length];
                 for (int i = 0; i < ga.Length; i++)
                 {
-                    string key = ILType.TypeReference.GenericParameters[0].Name;
+                    string key = ILType.TypeReference.GenericParameters[i].Name;
                     if (typeArguments[i] is ILRuntimeType)
                         ga[i] = new KeyValuePair<string, IType>(key, ((ILRuntimeType)typeArguments[i]).ILType);
                     else
@@ -326,7 +326,7 @@ namespace ILRuntime.Reflection
             }
             if ((bindingAttr & BindingFlags.DeclaredOnly) != BindingFlags.DeclaredOnly)
             {
-                if (BaseType != null && BaseType is ILRuntimeWrapperType)
+                if (BaseType != null && (BaseType is ILRuntimeWrapperType))
                 {
                     res.AddRange(BaseType.GetFields(bindingAttr));
                 }
@@ -422,7 +422,7 @@ namespace ILRuntime.Reflection
             }
             if ((bindingAttr & BindingFlags.DeclaredOnly) != BindingFlags.DeclaredOnly)
             {
-                if (BaseType != null && BaseType is ILRuntimeWrapperType)
+                if (BaseType != null && (BaseType is ILRuntimeWrapperType || BaseType is ILRuntimeType ))
                 {
                     res.AddRange(BaseType.GetProperties(bindingAttr));
                 }

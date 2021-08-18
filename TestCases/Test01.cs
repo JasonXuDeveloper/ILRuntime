@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ILRuntime.Runtime;
+using ILRuntimeTest.TestFramework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -39,8 +41,11 @@ namespace TestCases
 
         }
 
+        [ILRuntimeJIT(ILRuntimeJITFlags.JITOnDemand)]
         static int Add(int a, int b)
         {
+            if (b < 0)
+                return a;
             return a + b;
         }
 
@@ -48,12 +53,32 @@ namespace TestCases
         {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
+            int cnt = 0;
             for (int i = 0; i < 1000000; i++)
             {
-                Add(1, 2);
+                cnt += Add(i, 2);
             }
             sw.Stop();
-            Console.WriteLine(string.Format("cps:{0:0}", (1000000 * 1000 / sw.ElapsedMilliseconds)));
+            Console.WriteLine(string.Format("time: {0:0}ms cps:{1:0}, result={2}", sw.ElapsedMilliseconds, (1000000 * 1000 / sw.ElapsedMilliseconds), cnt));
+
+            sw.Restart();
+            cnt = 0;
+            for (int i = 0; i < 1000000; i++)
+            {
+                cnt += ILRuntimeTest.TestFramework.TestClass2.Add(i, 2);
+            }
+            sw.Stop();
+            Console.WriteLine(string.Format("time: {0:0}ms cps:{1:0}, result={2}", sw.ElapsedMilliseconds, (1000000 * 1000 / sw.ElapsedMilliseconds), cnt));
+        }
+
+        public static int UnitTest_PerformanceSimple()
+        {
+            int cnt = 0;
+            for (int i = 0; i < 5000000; i++)
+            {
+                cnt += i;
+            }
+            return cnt;
         }
         /// <summary>
         /// 性能测试
@@ -132,6 +157,30 @@ namespace TestCases
             Console.WriteLine(string.Format("res=" + a + ", cps:{0:0}", (1000000 * 1000 / sw.ElapsedMilliseconds)));
         }
 
+        public static void UnitTest_Performance9()
+        {
+            int[] array = new int[1024];
+            for (int i = 0; i < 1024; ++i)
+            {
+                array[i] = i;
+            }
+
+            int total = 0;
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
+            for (int j = 0; j < 1000; ++j)
+            {
+                for (int i = 0; i < 1024; ++i)
+                {
+                    total = total + array[i];
+                }
+            }
+
+            sw.Stop();
+            Console.WriteLine(string.Format("res=" + total + ", time:{0:0}", sw.ElapsedMilliseconds));
+        }
+
         public static void UnitTest_Performance6()
         {
             PerformanceTestCls obj = new PerformanceTestCls();
@@ -175,6 +224,32 @@ namespace TestCases
             }
             sw.Stop();
             Console.WriteLine(string.Format("res=" + a + ", cps:{0:0}", (1000000 * 1000 / sw.ElapsedMilliseconds)));
+        }
+
+        public static void UnitTest_Performance10()
+        {
+            TestVectorClass a = new TestVectorClass();
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            for (int i = 0; i < 1000000; i++)
+            {
+                TestVectorClass.ValueTypePerfTest(i, "b", a.Vector2, a);
+            }
+            sw.Stop();
+            Console.WriteLine(string.Format("time=" + sw.ElapsedMilliseconds + ", cps:{0:0}", (1000000 * 1000 / sw.ElapsedMilliseconds)));
+        }
+
+        public static void UnitTest_Performance11()
+        {
+            TestVectorClass a = new TestVectorClass();
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            for (int i = 0; i < 1000000; i++)
+            {
+                TestVectorClass.ValueTypePerfTest2(i, "b", a.Obj, a);
+            }
+            sw.Stop();
+            Console.WriteLine(string.Format("time=" + sw.ElapsedMilliseconds + ", cps:{0:0}", (1000000 * 1000 / sw.ElapsedMilliseconds)));
         }
         class PerformanceTestCls
         {

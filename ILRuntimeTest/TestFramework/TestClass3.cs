@@ -10,6 +10,16 @@ namespace ILRuntimeTest.TestFramework
     public class TestClass3
     {
         public TestStruct Struct;
+        public static string getString(int startIndex = 0, int length = -1)
+        {
+            throw new Exception();
+        }
+
+        public static string getString(ref int startIndex, int length = -1)
+        {
+            startIndex++;
+            return startIndex.ToString() + length;
+        }
     }
 
     [NeedAdaptor]
@@ -17,6 +27,7 @@ namespace ILRuntimeTest.TestFramework
     {
         protected int a;
         protected int b;
+        protected TestClass2 cls2;
 
         public virtual void KKK()
         {
