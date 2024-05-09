@@ -674,6 +674,39 @@ namespace TestCases
             var e2 = GenericStaticMethodTest14Sub<Vector3>();
             Console.WriteLine(e2);
         }
+
+        public static void GenericTest()
+        {
+            Dictionary<int, string[][]> dic = new Dictionary<int, string[][]>();
+            dic[0] = new string[5][];
+
+            foreach(var i in dic)
+            {
+                if (i.Key != 0 || i.Value.Length != 5)
+                    throw new Exception();
+            }
+        }
+
+        public static void GenericStaticMethodTest19()
+        {
+            GenericStaticMethodTest19Sub(new testConstrainsA());
+            GenericStaticMethodTest19Sub2(new testConstrainsA());
+        }
+
+        class testConstrainsA
+        {
+        }
+        static void GenericStaticMethodTest19Sub<T>(T a) where T : testConstrainsA
+        {
+            object test = null;
+            var testB = test as T; // 此行报空指针
+            Console.WriteLine(testB);
+        }
+        static void GenericStaticMethodTest19Sub2<T>(T a) where T : testConstrainsA
+        {
+            var testB = a as T; // 此行报空指针
+            Console.WriteLine(testB);
+        }
     }
 
 

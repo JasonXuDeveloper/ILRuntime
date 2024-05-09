@@ -159,5 +159,144 @@ namespace TestCases
             string res = ILRuntimeTest.TestFramework.TestClass3.getString(ref initial, 2);
             Console.WriteLine(res);
         }
+
+        class ClsWithManyParams
+        {
+            public int a;
+            public int b;
+            public int c;
+            public int d;
+            public int e;
+            public int f;
+            public int g;
+
+            public ClsWithManyParams(int a, int b, int c, int d, int e, int f, int g)
+            {
+                this.a = a;
+                this.b = b;
+                this.c = c;
+                this.d = d;
+                this.e = e;
+                this.f = f;
+                this.g = g;
+            }
+
+
+        }
+
+        public static void Test07()
+        {
+            ClsWithManyParams cls = new ClsWithManyParams(1, 2, 3, 4, 5, 6, 7);
+            if (cls.a != 1)
+                throw new Exception();
+            if (cls.b != 2)
+                throw new Exception();
+            if (cls.c != 3)
+                throw new Exception();
+            if (cls.d != 4)
+                throw new Exception();
+            if (cls.e != 5)
+                throw new Exception();
+            if (cls.f != 6)
+                throw new Exception();
+            if (cls.g != 7)
+                throw new Exception();
+
+        }
+
+        public static void TestUsingForeach()
+        {
+            var cls = new TestUsingCls();
+            var cls2 = new TestUsingCls();
+            int[] arr = new int[10];
+            int res = 0;
+            using (cls)
+            {
+                using (cls2)
+                {
+                    foreach (var i in arr)
+                    {
+                        res += i;
+                    }
+                }
+            }
+
+            if (!cls.Disposed || !cls2.Disposed)
+            {
+                throw new Exception();
+            }
+        }
+
+        public static void TestUsingNested()  // 在外部 dll 中调用此过程
+        {
+            int len = 8;
+            using (var o = new SampleDisposableClass<int>(len))
+            {
+                using (var p = new SampleDisposableClass<float>(len))
+                {
+                    for (int i = 0; i < len; i++)
+                    {
+                        o[i] = i;
+                        p[i] = o[i] * 0.5f;
+                    }
+                    Console.WriteLine(p[len - 1]);
+                }
+            }
+        }
+
+        class TestUsingCls : IDisposable
+        {
+            public bool Disposed { get; set; }
+
+            public void Dispose()
+            {
+                Disposed = true;
+            }
+        }
+
+        public class SampleDisposableClass<T> : IDisposable
+        {
+            readonly T[] arr;
+
+            public SampleDisposableClass(int length = 8)
+            {
+                arr = new T[length];
+            }
+
+            public T this[int index]
+            {
+                get => arr[index];
+                set => arr[index] = value;
+            }
+
+            private bool disposedValue;
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!disposedValue)
+                {
+                    Console.WriteLine($"Dispose({disposing}) -> {typeof(T)}");
+                    if (disposing)
+                    {
+                        // pass
+                    }
+                    disposedValue = true;
+                }
+            }
+
+            ~SampleDisposableClass()
+            {
+                Dispose(disposing: false);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.Log($"Finalizer -> {typeof(T)}");
+#endif
+            }
+
+            public void Dispose()
+            {
+                Dispose(disposing: true);
+                GC.SuppressFinalize(this);
+            }
+        }
     }
 }

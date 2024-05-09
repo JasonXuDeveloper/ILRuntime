@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using ILRuntime.Runtime;
 using ILRuntimeTest.TestFramework;
 
 namespace TestCases
@@ -54,6 +54,7 @@ namespace TestCases
             cls2.TestAbstract();
             cls2.TestVirtual();
             cls2.TestField();
+            cls2.AA1();
 
             Console.WriteLine("----------------------------------");
 
@@ -195,8 +196,8 @@ namespace TestCases
 
             if (list.Count != 1)
                 throw new Exception("Error");
-            c1 = (Child2)c2;
-            Console.WriteLine(c1.ToString());
+            var c3 = (Child3)c2;
+            Console.WriteLine(c3.ToString());
             c1 = c2 as Child2;
             Console.WriteLine(c1 == null);
         }
@@ -266,6 +267,140 @@ namespace TestCases
             res.bbbb = 5000;
             if (res.bbbb != 5000)
                 throw new Exception();
+        }
+
+        public static void InheritanceTest19()
+        {
+            TestExplicitInterface a = new TestExplicitInterface();
+            ((IDisposable)a).Dispose();
+            if (!a.Called)
+                throw new Exception();
+        }
+
+        public static void InheritanceTest20()
+        {
+            var mapa = new MapA();
+            var mapb = new MapB();
+            mapb.Add("11", new BModel());
+            var aList = new System.Collections.Generic.List<AModel>();
+            var bList = new System.Collections.Generic.List<BModel>();
+            mapa.GetAll(aList);
+            mapb.GetAll(bList);
+
+            if (bList.Count < 1)
+            {
+                throw new Exception();
+            }
+        }
+
+        CrossClass crossClass;
+        public static void InheritanceTest21()
+        {
+            var inheritanceTest = new InheritanceTest();
+            var dic = new Dictionary<int, CrossClass>();
+            dic.Add(1, new CrossClass());
+            dic.TryGetValue(1, out inheritanceTest.crossClass);
+            Console.WriteLine("InheritanceTest21:classA is " + inheritanceTest.crossClass.classA);
+        }
+
+        public static void InheritanceTest22()
+        {
+            var inheritanceTest = new InheritanceTest();
+            var dic = new Dictionary<int, CrossClass>();
+            dic.Add(1, new CrossClass());
+            dic.TryGetValue(1, out inheritanceTest.crossClass);
+            inheritanceTest.crossClass.classA = new ClassA();
+            Console.WriteLine("InheritanceTest21:classA is " + inheritanceTest.crossClass.classA);
+        }
+
+        [ILRuntimeTest.ILRuntimeTest(ExpectException = typeof(InvalidCastException))]
+        public static void InheritanceTest23()
+        {
+            TestClass cls = new TestClass();
+            if (cls is InterfaceTest2)
+                throw new Exception();
+            InterfaceTest2 cls2 = cls as InterfaceTest2;
+            if (cls2 is InterfaceTest2)
+                throw new Exception();
+            TestClass3 cls3 = (TestClass3)(cls as InterfaceTest2);
+            if(cls3 != null)
+                throw new Exception();
+            cls2 = new TestCls3();
+            var cls4 = (TestCls3)cls2;
+            if(cls4 == null)
+                throw new Exception();
+            InterfaceTest2 cls5 = (InterfaceTest2)cls;
+            if (cls5 is InterfaceTest2)
+                throw new Exception();
+        }
+        public static void InheritanceTest24()
+        {
+            ListSub list = new ListSub();
+            float res = list.Update(0, 1);
+            if (res < 10)
+                throw new Exception();
+            res = list.Update2(0, 1);
+            if (res < 10)
+                throw new Exception();
+        }
+        class ListSub : AbstractBase
+        {
+            List<AbstractBase> children = new List<AbstractBase>();
+            public ListSub()
+            {
+                for (int i = 0; i < 10; i++)
+                    children.Add(new ListSub2());
+            }
+
+            public override float Update(float a, float b)
+            {
+                float baseVal = a;
+                foreach (var i in children)
+                {
+                    baseVal += i.Update(baseVal, b);
+                }
+                return baseVal;
+            }
+
+            public override float Update2(float a, float b)
+            {
+                float baseVal = a;
+                foreach (var i in children)
+                {
+                    baseVal += i.Update2(baseVal, b);
+                }
+                return baseVal;
+            }
+        }
+
+        class ListSub2 : AbstractBase
+        {
+            public override float Update(float a, float b)
+            {
+                return a + b;
+            }
+
+            [ILRuntimeJIT(ILRuntimeJITFlags.NoJIT)]
+            public override float Update2(float a, float b)
+            {
+                return a + b;
+            }
+        }
+        abstract class AbstractBase
+        {
+            [ILRuntimeJIT(ILRuntimeJITFlags.NoJIT)]
+            public abstract float Update(float a, float b);
+
+            public abstract float Update2(float a, float b);
+        }
+
+        class TestExplicitInterface : IDisposable
+        {
+            public bool Called { get; set; }
+            void IDisposable.Dispose()
+            {
+                Called = true;
+            }
         }
 
         static void Alloc<T>(out T value)where T : TestClass2
@@ -477,7 +612,7 @@ namespace TestCases
             T obj = Activator.CreateInstance(typeof(T)) as T; //这样写错误
                                                               //MyClass obj = Activator.CreateInstance(typeof(T)) as  MyClass; //这样写正确
             obj.Reg();
-        }
+        }        
 
         interface IMy
         {
@@ -524,13 +659,19 @@ namespace TestCases
         }
     }
 
-    class TestCls2 : ClassInheritanceTest
+    class TestCls2 : ClassInheritanceTest, IAs1
     {
         public TestCls2()
             : base(4, 5)
         {
             testVal = 2;
         }
+
+        public void AA1()
+        {
+            Console.WriteLine("This is TestCls2.AA1");
+        }
+
         public override void TestAbstract()
         {
             Console.WriteLine("This is TestCls2.TestAbstract");
@@ -852,5 +993,41 @@ namespace TestCases
 
         }
     }
+    public interface IModel { }
 
+    public class AModel : IModel { }
+    public class BModel : IModel { }
+
+    public abstract class BaseMap<TKey, TModel> where TModel : class, IModel
+    {
+        TestHashMap<TKey, TModel> map = new TestHashMap<TKey, TModel>();
+        public void Add(TKey key, TModel mode)
+        {
+            map.Add(key, mode);
+        }
+        public void BaseGetAll(System.Collections.Generic.List<TModel> list)
+        {
+            foreach (var pair in map)
+            {
+                list.Add(pair.Value);
+            }
+
+        }
+    }
+    //key为int 类型
+    public class MapA : BaseMap<int, AModel>
+    {
+        public void GetAll(System.Collections.Generic.List<AModel> list)
+        {
+            base.BaseGetAll(list);
+        }
+    }
+    //key为string 类型
+    public class MapB : BaseMap<string, BModel>
+    {
+        public void GetAll(System.Collections.Generic.List<BModel> list)
+        {
+            base.BaseGetAll(list);
+        }
+    }
 }

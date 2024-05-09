@@ -170,7 +170,7 @@ namespace ILRuntime.Runtime.CLRBinding
                 int paramCnt = param.Length;
                 if (!i.IsStatic)
                     paramCnt++;
-                sb.AppendLine(string.Format("        static StackObject* {0}_{1}(ILIntepreter __intp, StackObject* __esp, IList<object> __mStack, CLRMethod __method, bool isNewObj)", i.Name, idx));
+                sb.AppendLine(string.Format("        static StackObject* {0}_{1}(ILIntepreter __intp, StackObject* __esp, AutoList __mStack, CLRMethod __method, bool isNewObj)", i.Name, idx));
                 sb.AppendLine("        {");
                 sb.AppendLine("            ILRuntime.Runtime.Enviorment.AppDomain __domain = __intp.AppDomain;");
                 if (param.Length != 0 || !i.IsStatic)
@@ -331,6 +331,12 @@ namespace ILRuntime.Runtime.CLRBinding
                                 case "Modulus":
                                     sb.AppendLine(string.Format("{0} % {1};", param[0].Name, param[1].Name));
                                     break;
+                                case "LeftShift":
+                                    sb.AppendLine(string.Format("{0} << {1};", param[0].Name, param[1].Name));
+                                    break;
+                                case "RightShift":
+                                    sb.AppendLine(string.Format("{0} >> {1};", param[0].Name, param[1].Name));
+                                    break;
                                 case "Implicit":
                                 case "Explicit":
                                     {
@@ -339,6 +345,12 @@ namespace ILRuntime.Runtime.CLRBinding
                                         i.ReturnType.GetClassName(out clsName, out realClsName, out isByRef);
                                         sb.AppendLine(string.Format("({1}){0};", param[0].Name, realClsName));
                                     }
+                                    break;
+                                case "Increment":
+                                    sb.AppendLine(string.Format("++{0};", param[0].Name));
+                                    break;
+                                case "Decrement":
+                                    sb.AppendLine(string.Format("--{0};", param[0].Name));
                                     break;
                                 default:
                                     throw new NotImplementedException(i.Name);

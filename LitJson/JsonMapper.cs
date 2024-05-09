@@ -20,7 +20,11 @@ using ILRuntime.Runtime.Stack;
 using ILRuntime.CLR.Method;
 using ILRuntime.CLR.Utils;
 using Object = System.Object;
-
+#if DEBUG && !DISABLE_ILRUNTIME_DEBUG
+using AutoList = System.Collections.Generic.List<object>;
+#else
+using AutoList = ILRuntime.Other.UncheckedList<object>;
+#endif
 namespace LitJson
 {
     /// <summary>
@@ -185,36 +189,40 @@ namespace LitJson
             ArrayMetadata data = new ArrayMetadata ();
 
             data.IsArray = type.IsArray;
-
-            if (type.GetInterface ("System.Collections.IList") != null)
+            if (type.FullName == "LitJson.JsonData") {
+                data.ElementType = type;
                 data.IsList = true;
+            } else {
+                if (type.GetInterface ("System.Collections.IList") != null)
+                    data.IsList = true;
 
-            if (type is ILRuntime.Reflection.ILRuntimeWrapperType)
-            {
-                var wt = (ILRuntime.Reflection.ILRuntimeWrapperType)type;
-                if (data.IsArray)
+                if (type is ILRuntime.Reflection.ILRuntimeWrapperType)
                 {
-                    data.ElementType = wt.CLRType.ElementType.ReflectionType; 
+                    var wt = (ILRuntime.Reflection.ILRuntimeWrapperType)type;
+                    if (data.IsArray)
+                    {
+                        data.ElementType = wt.CLRType.ElementType.ReflectionType; 
+                    }
+                    else
+                    {
+                        data.ElementType = wt.CLRType.GenericArguments[0].Value.ReflectionType;
+                    }
                 }
                 else
                 {
-                    data.ElementType = wt.CLRType.GenericArguments[0].Value.ReflectionType;
-                }
-            }
-            else
-            {
-                foreach (PropertyInfo p_info in type.GetProperties())
-                {
-                    if (p_info.Name != "Item")
-                        continue;
+                    foreach (PropertyInfo p_info in type.GetProperties())
+                    {
+                        if (p_info.Name != "Item")
+                            continue;
 
-                    ParameterInfo[] parameters = p_info.GetIndexParameters();
+                        ParameterInfo[] parameters = p_info.GetIndexParameters();
 
-                    if (parameters.Length != 1)
-                        continue;
+                        if (parameters.Length != 1)
+                            continue;
 
-                    if (parameters[0].ParameterType == typeof(int))
-                        data.ElementType = p_info.PropertyType;
+                        if (parameters[0].ParameterType == typeof(int))
+                            data.ElementType = p_info.PropertyType;
+                    }
                 }
             }
             lock (array_metadata_lock) {
@@ -237,44 +245,48 @@ namespace LitJson
                 data.IsDictionary = true;
 
             data.Properties = new Dictionary<string, PropertyMetadata> ();
-            foreach (PropertyInfo p_info in type.GetProperties ()) {
-                if (Attribute.IsDefined(p_info, typeof(JsonIgnoreAttribute), true))
-                    continue;
-                if (p_info.Name == "Item") {
-                    ParameterInfo[] parameters = p_info.GetIndexParameters ();
-
-                    if (parameters.Length != 1)
+            if(type.FullName == "LitJson.JsonData") {
+                data.ElementType = type;
+            } else {
+                foreach (PropertyInfo p_info in type.GetProperties ()) {
+                    if (Attribute.IsDefined(p_info, typeof(JsonIgnoreAttribute), true))
                         continue;
+                    if (p_info.Name == "Item") {
+                        ParameterInfo[] parameters = p_info.GetIndexParameters ();
 
-                    if (parameters[0].ParameterType == typeof(string))
-                    {
-                        if (type is ILRuntime.Reflection.ILRuntimeWrapperType)
+                        if (parameters.Length != 1)
+                            continue;
+
+                        if (parameters[0].ParameterType == typeof(string))
                         {
-                            data.ElementType = ((ILRuntime.Reflection.ILRuntimeWrapperType)type).CLRType.GenericArguments[1].Value.ReflectionType;
+                            if (type is ILRuntime.Reflection.ILRuntimeWrapperType)
+                            {
+                                data.ElementType = ((ILRuntime.Reflection.ILRuntimeWrapperType)type).CLRType.GenericArguments[1].Value.ReflectionType;
+                            }
+                            else
+                                data.ElementType = p_info.PropertyType;
                         }
-                        else
-                            data.ElementType = p_info.PropertyType;
+
+                        continue;
                     }
 
-                    continue;
+                    PropertyMetadata p_data = new PropertyMetadata ();
+                    p_data.Info = p_info;
+                    p_data.Type = p_info.PropertyType;
+
+                    data.Properties.Add (p_info.Name, p_data);
                 }
 
-                PropertyMetadata p_data = new PropertyMetadata ();
-                p_data.Info = p_info;
-                p_data.Type = p_info.PropertyType;
+                foreach (FieldInfo f_info in type.GetFields ()) {
+                    if (Attribute.IsDefined(f_info, typeof(JsonIgnoreAttribute), true))
+                        continue;
+                    PropertyMetadata p_data = new PropertyMetadata ();
+                    p_data.Info = f_info;
+                    p_data.IsField = true;
+                    p_data.Type = f_info.FieldType;
 
-                data.Properties.Add (p_info.Name, p_data);
-            }
-
-            foreach (FieldInfo f_info in type.GetFields ()) {
-                if (Attribute.IsDefined(f_info, typeof(JsonIgnoreAttribute), true))
-                    continue;
-                PropertyMetadata p_data = new PropertyMetadata ();
-                p_data.Info = f_info;
-                p_data.IsField = true;
-                p_data.Type = f_info.FieldType;
-
-                data.Properties.Add (f_info.Name, p_data);
+                    data.Properties.Add (f_info.Name, p_data);
+                }
             }
 
             lock (object_metadata_lock) {
@@ -441,7 +453,11 @@ namespace LitJson
                 IList list;
                 Type elem_type;
 
-                if (! t_data.IsArray) {
+                if (value_type.FullName == "LitJson.JsonData")
+                {
+                    list = new JsonData();
+                    elem_type = t_data.ElementType;
+                } else if (! t_data.IsArray) {
                     list = (IList) Activator.CreateInstance (inst_type);
                     elem_type = t_data.ElementType;
                 } else {
@@ -479,7 +495,10 @@ namespace LitJson
             {
                 AddObjectMetadata(value_type);
                 ObjectMetadata t_data = object_metadata[value_type];
-                if (value_type is ILRuntime.Reflection.ILRuntimeType)
+                if (value_type.FullName == "LitJson.JsonData")
+                {
+                    instance = new JsonData();
+                } else if (value_type is ILRuntime.Reflection.ILRuntimeType)
                     instance = ((ILRuntime.Reflection.ILRuntimeType) value_type).ILType.Instantiate();
                 else
                     instance = Activator.CreateInstance(value_type);
@@ -1074,7 +1093,7 @@ namespace LitJson
             }
         }
 
-        public unsafe static StackObject* JsonToObject(ILIntepreter intp, StackObject* esp, IList<object> mStack, CLRMethod method, bool isNewObj)
+        public unsafe static StackObject* JsonToObject(ILIntepreter intp, StackObject* esp, AutoList mStack, CLRMethod method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = intp.AppDomain;
             StackObject* ptr_of_this_method;
@@ -1088,7 +1107,7 @@ namespace LitJson
             return ILIntepreter.PushObject(__ret, mStack, result_of_this_method);
         }
 
-        public unsafe static StackObject* JsonToObject2(ILIntepreter intp, StackObject* esp, IList<object> mStack, CLRMethod method, bool isNewObj)
+        public unsafe static StackObject* JsonToObject2(ILIntepreter intp, StackObject* esp, AutoList mStack, CLRMethod method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = intp.AppDomain;
             StackObject* ptr_of_this_method;
@@ -1102,7 +1121,7 @@ namespace LitJson
             return ILIntepreter.PushObject(__ret, mStack, result_of_this_method);
         }
 
-        public unsafe static StackObject* JsonToObject3(ILIntepreter intp, StackObject* esp, IList<object> mStack, CLRMethod method, bool isNewObj)
+        public unsafe static StackObject* JsonToObject3(ILIntepreter intp, StackObject* esp, AutoList mStack, CLRMethod method, bool isNewObj)
         {
             ILRuntime.Runtime.Enviorment.AppDomain __domain = intp.AppDomain;
             StackObject* ptr_of_this_method;

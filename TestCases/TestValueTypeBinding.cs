@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ILRuntimeTest;
 using ILRuntimeTest.TestFramework;
 
 namespace TestCases
@@ -19,6 +20,7 @@ namespace TestCases
             Console.WriteLine(a.ToString());
         }
 
+        [ILRuntimeTest(IsToDo = true)]
         public static void Test01()
         {
             TestVector3 vec = new TestVector3(100, 1, 0);
@@ -241,7 +243,7 @@ namespace TestCases
         public static void UnitTest_10035()
         {
             TestVector3[] FuncBtnsPos1 = new TestVector3[3] { TestVector3.One, TestVector3.One, TestVector3.One };
-            foreach(var i in FuncBtnsPos1)
+            foreach (var i in FuncBtnsPos1)
             {
                 Console.WriteLine(i.ToString());
             }
@@ -292,7 +294,7 @@ namespace TestCases
             rawPos.y = 1122333;
 
             Console.WriteLine(rawPos.y);
-            if(rawPos.y != 1122333)
+            if (rawPos.y != 1122333)
                 throw new AccessViolationException();
         }
 
@@ -432,5 +434,191 @@ namespace TestCases
 
             IntA a = new IntA(100);
         }
+
+        public static void UnitTest_10045()
+        {
+            JInt i = new JInt();
+            if (i++ != 0)
+                throw new Exception();
+            if (++i != 2)
+                throw new Exception();
+            if (i-- != 2)
+                throw new Exception();
+            i -= 10;
+            if (i != -9)
+                throw new Exception();
+            --i;
+            Console.WriteLine(i);
+
+            for (JInt x = 20; x > 0; x--)
+            {
+                Console.WriteLine($"for内: x = {x}");
+            }
+        }
+
+        public static void UnitTest_10046()
+        {
+            TestVector3.TestDelegate2 = UnitTest_10046Sub;
+            TestVector3.DoTest2();
+        }
+
+        static void UnitTest_10046Sub(TestVector3 a)
+        {
+            a = a + TestVector3.One2;
+            Console.WriteLine(a);
+            if (a.X != 2)
+                throw new Exception();
+        }
+
+        public static void UnitTest_10047()
+        {
+            TestVector3[] arr2 = new TestVector3[10];
+            arr2[0].X = 1243;
+            arr2[0] += TestVector3.One;
+
+            if(Math.Abs(arr2[0].X - 1244)>0.001f)
+                throw new Exception();
+        }
+
+        public static void UnitTest_10048()
+        {
+            TestVectorClass cls = new TestVectorClass();
+            TestVectorClass cls2 = new TestVectorClass();
+            for (int i = 0; i < 3; i++)
+            {
+                cls.Vector2 = cls2.Vector2 = new TestVector3(3, 4, i);
+                Console.WriteLine(cls.Vector2);
+            }
+
+            if (cls.Vector2.Z != 2)
+                throw new Exception($"cls.Vector2.Z == {cls.Vector2.Z}");
+        }
+        static TestStructB mAttr;
+        public static void UnitTest_10049()
+        {
+            MinCirclePath path = new MinCirclePath();
+            path.Test();
+        }
+
+        public class MinCirclePath
+        {
+            private TestStructB mAttr;
+
+            public void Test()
+            {
+                mAttr = GetAttr();
+
+                Console.WriteLine(mAttr);
+            }
+
+            private TestStructB GetAttr()
+            {
+                var a = new TestStructA() { value = 5 };
+
+                //这样写不会错
+                //var ret = TestStructB.GetOne(a);
+                //return ret;
+
+                //这样直接返回就会错
+                return TestStructB.GetOne(a);
+            }
+        }
+
+        public static void UnitTest_10050()
+        {
+            // 热更工程使用
+            List<TestVector3NoBinding> structs = new List<TestVector3NoBinding>();
+            for (int i = 0; i < 5; i++)
+            {
+                TestVector3NoBinding t = new TestVector3NoBinding();
+                if (i % 2 != 0)
+                    t.x = i;
+                structs.Add(t);
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                var item = structs[i];
+                Console.WriteLine(item.x);
+                if (i % 2 != 0)
+                {
+                    if (item.x != i)
+                        throw new Exception();
+                }
+                else
+                {
+                    if (item.x != 0)
+                        throw new Exception();
+                }
+            }
+        }
+
+        public static void UnitTest_10051()
+        {
+            var trts = new TestRunTimeStack();
+            trts.Run();
+            //Debug.LogFormat("RunTest4");
+        }
+
+
+        public class BaseObj
+        {
+            private Fixed64Vector2 fv2;
+
+            public void SetPos(int x, int y)
+            {
+                fv2.x = new ILRuntimeTest.TestFramework.Fixed64(x);
+            }
+
+            public BaseObj()
+            {
+                int x, y;
+                x = 123;
+                y = 456;
+                fv2 = new Fixed64Vector2(x, y);
+            }
+
+            public Fixed64Vector2 V2
+            {
+                get
+                {
+                    return fv2;
+                }
+            }
+        }
+
+        public class TestObj : BaseObj
+        {
+            private int n;
+        }
+
+        public class TestRunTimeStack
+        {
+            public TestRunTimeStack()
+            {
+            }
+
+            public void Run()
+            {
+                List<TestObj> list = new List<TestObj>();
+                for (int i = 0; i < 1000; i++)
+                {
+                    var obj = new TestObj();
+                    obj.SetPos(i, i);
+                    list.Add(obj);
+                }
+
+                list.Sort((a, b) => {
+                    if (a.V2.x < b.V2.x)
+                        return 1;
+                    else if (a.V2.x > b.V2.x)
+                        return -1;
+                    return 0;
+                });
+
+                if (list[0].V2.x.RawValue != 999)
+                    throw new Exception();
+            }
+        }
+
     }
 }

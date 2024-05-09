@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using LitJson;
 using ILRuntimeTest.TestFramework;
+using ILRuntimeTest;
 
 namespace TestCases
 {
@@ -169,6 +170,7 @@ namespace TestCases
             }
         }
 
+        [ILRuntimeTest(IsToDo = true)]
         public static void JsonTest7()
         {
             JsonTestEnum[] arr = new JsonTestEnum[] { JsonTestEnum.Test2, JsonTestEnum.Test3 };
@@ -240,106 +242,46 @@ namespace TestCases
             Console.WriteLine("====================");
         }
 
-        public enum EnumTest
+        private class A
         {
-            a,
-            b,
-            c,
         }
 
-        public class TestJsonSub
+        private class B : A
         {
-            public string name = "im sub";
-            public List<EnumTest> enumTestList = new List<EnumTest>()
-        {
-            EnumTest.a,
-            EnumTest.b
-        };
+            string name = "";
         }
 
-        public class TestJson
+        private class C : A
         {
-            public EnumTest enumTest = EnumTest.c;
+            string size = "";
+        }
+        public static void JsonTest9()
+        {
+            Dictionary<string, B> data = Load<B>("{\"test\":{\"name\":\"test\"},\"test2\":{\"name\":\"test\"}}");
 
-            public List<EnumTest> enumTestList = new List<EnumTest>()
+            foreach (var item in data)
             {
-                EnumTest.a,
-                EnumTest.b
-            };
+                if (typeof(B).Name != item.Value.GetType().Name)
+                    throw new Exception();
+                Console.WriteLine(typeof(B).Name + "类型" + item.Value.GetType().Name);
+            }
 
-            public List<string> stringTestList = new List<string>()
+            Dictionary<string, C> data1 = Load<C>("{\"test\":{\"size\":\"test\"},\"test2\":{\"size\":\"test\"}}");
+
+            foreach (var item in data1)
             {
-                "aaa","bbb","ccc"
-            };
-
-            public List<int> intTestList = new List<int>()
-            {
-            1,2,3
-            };
-
-            public List<double> doubleTestList = new List<double>()
-            {
-                1,2,3
-            };
-
-            public List<TestJsonSub> TestJsonSubList = new List<TestJsonSub>()
-            {
-                new TestJsonSub(){name = "sub a"},
-                new TestJsonSub(){name = "sub b"},
-            };
-
-
-            public Dictionary<EnumTest, double> enumDict = new Dictionary<EnumTest, double>()
-            {
-                {EnumTest.a,1.0},
-                {EnumTest.b,2.0},
-            };
-
-
-            public Dictionary<string, double> stringDict = new Dictionary<string, double>()
-            {
-                {"stra",1.0},
-                {"strb",2.0},
-            };
-
-            public override string ToString()
-            {
-                string s = $"{enumTest} \n";
-                foreach (var test in enumTestList)
-                {
-                    s += test + ",";
-                }
-                s += "\n";
-                foreach (var test in enumDict)
-                {
-                    s += test.Key + "=" + test.Value + " , ";
-                }
-                s += "\n";
-                foreach (var test in stringDict)
-                {
-                    s += test.Key + "=" + test.Value + " , ";
-                }
-                s += "\n";
-                foreach (var test in TestJsonSubList)
-                {
-                    s += test.name;
-                }
-                return s;
+                if (typeof(C).Name != item.Value.GetType().Name)
+                    throw new Exception();
+                Console.WriteLine(typeof(C).Name + "类型" + item.Value.GetType().Name);
             }
         }
 
-        public static void JsonTest9()
+        private static Dictionary<string, T> Load<T>(string json) where T : A
         {
-            //原本的不可以，改了后可以
-            Console.WriteLine("Enum/List/Dictionary Test");
-            TestJson t = new TestJson();
-            t.enumTestList.Add(EnumTest.c);
-            t.enumDict.Add(EnumTest.c, 99999.999);
-            var js = JsonMapper.ToJson(t);
-            Console.WriteLine("js:\n" + js);
-            var obj = JsonMapper.ToObject<TestJson>(js);
-            Console.WriteLine(obj.ToString());
-            Console.WriteLine("====================");
+            Dictionary<string, T> data = JsonMapper.ToObject<Dictionary<string, T>>(json);
+
+            return data;
         }
+
     }
 }

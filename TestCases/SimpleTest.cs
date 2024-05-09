@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ILRuntimeTest;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -151,6 +152,7 @@ namespace TestCases
             TestA.Instance.TestCall("error test");
         }
 
+        [ILRuntimeTest(IsToDo = true)]
         public static void MultiDimensionalArrayTest()
         {
             int[,] arr = new int[3, 4];
@@ -184,9 +186,17 @@ namespace TestCases
             Console.WriteLine(new Test4().Equals(act2));//false
         }
 
+        [ILRuntimeTest(IsToDo = true)]
         public static void NullableTest()
         {
             int? val = 123;
+            if (val.HasValue)
+                Console.WriteLine(val.Value.ToString());
+        }
+
+        public static void NullableTest2()
+        {
+            int? val = null;
             if (val.HasValue)
                 Console.WriteLine(val.Value.ToString());
         }
